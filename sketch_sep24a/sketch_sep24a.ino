@@ -1,4 +1,6 @@
 #include <Servo.h>
+#define MIN_PULSE_LENGTH 1000 // Minimum pulse length in µs
+#define MAX_PULSE_LENGTH 2000 // Maximum pulse length in µs
 
 Servo ESC;     // create servo object to control the ESC
 
@@ -16,14 +18,10 @@ void setup() {
 }
 
 void loop() {
-  // Serial.println("Enter RPM value: ");
-  // while (Serial.available() == 0){}
-  // RPM = Serial.parseInt();
-  // Serial.println("hi");
-  // Serial.println(RPM);
   Serial.print("Setting RPM: ");
   Serial.println(input_RPM);
   Serial.println(RPM);
+  Serial.parseInt();
 
   RPM = map(input_RPM, 0, 3600, 0, 180);   // scale it to use it with the servo library (value between 0 and 3600 rad/s)
   ESC.write(RPM);    // Send the signal to the ESC
@@ -34,5 +32,28 @@ void loop() {
   ESC.write(RPM);    // Send the signal to the ESC
 
   delay(5000);
+    if (Serial.available()) {
+        RPM = Serial.read();
 
+        switch (RPM) {
+            // 0
+            case 48 : Serial.println("Sending minimum throttle");
+                      ESC.writeMicroseconds(MIN_PULSE_LENGTH);
+            break;
+
+            // 1
+            case 49 : Serial.println("Sending maximum throttle");
+                      ESC.writeMicroseconds(MAX_PULSE_LENGTH);
+            break;
+
+            // 2
+            case 50 : Serial.print("Running test in 3");
+                      delay(1000);
+                      Serial.print(" 2");
+                      delay(1000);
+                      Serial.println(" 1...");
+                      delay(1000);
+            break;
+        }
+    }
 }
